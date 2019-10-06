@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "Prescriptions",
+    'Prescriptions',
     'rest_framework',
     'frontend'
 ]
@@ -121,3 +121,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# User Model
+
+AUTH_USER_MODEL = 'Prescriptions.userModel'
+
+#Lgin urls
+
+LOGIN_URL = '/login'
+
+LOGIN_REDIRECT_URL = '/accounts/profile'
+
+LOGOUT_REDIRECT_URL = 'home'
