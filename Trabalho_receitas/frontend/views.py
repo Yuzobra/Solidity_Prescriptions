@@ -70,8 +70,11 @@ def LoginUser(request):
     body = json.loads(request.body.decode('utf-8'))
     print(body)
     user = authenticate(username=body["username"],password=body["password"])
+    print("user",user)
     if user is not None:
         login(request, user)
+        print('login tentado')
+        print(request.user.username,request.user.type)
         success_url = reverse_lazy('home')
         return HttpResponse("ok")
     else:
@@ -85,6 +88,8 @@ def LogOut(request):
     return HttpResponse('ok')
 def getUserData(request):
     if request.user.is_authenticated:
+        print('usuario esta autenticado')
+        print(request.user.username,request.user.type)
         return HttpResponse(json.dumps({'authenticated': "True","user":{"username":request.user.username,"type":request.user.type,"email":request.user.email}}))
     else:
         return HttpResponse(json.dumps({'authenticated': "False","user":"False"}))

@@ -2,16 +2,16 @@ import React , { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
 
-import { ethers } from 'ethers'
 
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
+import Web3 from 'web3';
+import Web3Provider from 'web3-react'
 
 import Header from './layout/Header';
 import Login from './login'
 import Register from './register';
 import Home from './home';
-
 
 
 class App extends Component{
@@ -22,11 +22,17 @@ class App extends Component{
       userInfo: null,
       isLoading:true
     }
+     this.web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
+
   }
 
   componentDidMount(){
-    console.log('root')
     this.getUserData();
+    if(window.web3){
+      console.log("window web3",this.web3.eth)
+      this.web3.eth.getAccounts().then(e => console.log("web3",e))
+      console.log("accounts",this.web3.eth.accounts[0])
+    }
   }
 
 
@@ -59,7 +65,7 @@ class App extends Component{
       return (
         <div>
           <Router>
-          <Header user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}} LogOut={this.LogOut}/>
+            <Header user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}} LogOut={this.LogOut}/>
             <Switch>
               <Route exact path='/(home|)/'>
                 <Home user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}}/>

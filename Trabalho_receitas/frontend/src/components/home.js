@@ -4,6 +4,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import MUIDataTable from "mui-datatables";
 
+
+import { withWeb3Context } from './teste'
+import { Connectors } from 'web3-react'
+const { InjectedConnector, NetworkOnlyConnector } = Connectors
+const MetaMask = new InjectedConnector({ supportedNetworks: [1, 4] })
+
 const useStyles = makeStyles(theme => ({
   TextField:{
     width:400,
@@ -11,7 +17,12 @@ const useStyles = makeStyles(theme => ({
 }))
 
 
+
+
 class Home extends React.Component{
+
+  
+
   constructor(props){
     super(props);
     this.state = {
@@ -25,6 +36,7 @@ class Home extends React.Component{
 
   componentDidUpdate(prevProps){
     if(prevProps != this.props){
+      console.log('HOME ATUALIZOU',prevProps,this.props)
       this.setState({user:this.props.user.userInfo})
     }
   }
@@ -56,11 +68,6 @@ class Home extends React.Component{
           </div>
         )
       }
-    }
-    else{
-      return(
-        <div></div>
-      )
     }
   }
 }
