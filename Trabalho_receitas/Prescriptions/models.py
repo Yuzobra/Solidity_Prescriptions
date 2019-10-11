@@ -21,12 +21,12 @@ class userModel(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
 class Prescription(models.Model):
-    medicCPF = models.CharField(max_length=11)
-    medicCRM = models.CharField(max_length=10) #ALTERAR PARA O VALOR CERTO
-    patientCPF = models.CharField(max_length=11)
-    medicine = models.CharField(max_length=50)
-    message = models.CharField(max_length=200)
+    medic = models.ForeignKey("Medic",on_delete=models.CASCADE, default=None)
+    patient = models.ForeignKey("Patient", on_delete=models.CASCADE, default=None)
+    medicine = models.CharField(max_length=50, default="error")
+    #message = models.CharField(max_length=200)
     quantity = models.IntegerField()
+    address = models.CharField(max_length=40, default="error")
     prescribedAt = models.DateTimeField(auto_now_add=True)
 
 

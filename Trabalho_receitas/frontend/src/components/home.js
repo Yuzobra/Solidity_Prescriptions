@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography } from '@material-ui/core'
+import { Typography, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import MUIDataTable from "mui-datatables";
@@ -27,6 +27,7 @@ class Home extends React.Component{
     super(props);
     this.state = {
       user:props.user.userInfo,
+      contract:props.contract
     }
   }
 
@@ -37,7 +38,7 @@ class Home extends React.Component{
   componentDidUpdate(prevProps){
     if(prevProps != this.props){
       console.log('HOME ATUALIZOU',prevProps,this.props)
-      this.setState({user:this.props.user.userInfo})
+      this.setState({user:this.props.user.userInfo, contract:this.props.contract})
     }
   }
 
@@ -65,9 +66,14 @@ class Home extends React.Component{
         return(
           <div>
             <Typography variant="h1">farmacia</Typography>
+            <Button onClick={() => this.props.deployContract()}>Deploy</Button>
           </div>
         )
       }
+    }
+    else{
+      console.log("ainda nao estou pronto");
+      return(null)
     }
   }
 }
