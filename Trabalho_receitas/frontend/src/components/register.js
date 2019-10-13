@@ -2,6 +2,7 @@ import React from 'react';
 import { TextField, Grid, Button, MenuItem, Typography } from '@material-ui/core'
 import { withRouter, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import { ToastErr, ToastSuccess } from './ToastFunction.js';
 
 const styles = {
   TextField:{
@@ -31,17 +32,66 @@ class Register extends React.Component{
   handleSubmit(e){
     e.preventDefault();
     var state = this.state;
+
+
+
     if(state.type == 'Medic'){
+      if(state.cpf == '' || state.crm == '' || state.email == '' || state.username == '' || state.password == ""){
+        ToastErr("Fill all fields")
+        return;
+      }
+      var sum = 0;
+      var cpf = parseInt(state.cpf,10);
+      while (cpf) {
+          sum += cpf % 10;
+          cpf = Math.floor(cpf / 10);
+      }
+
+      if(sum%11 != 0 || state.cpf.length != 11){
+        ToastErr("Use a valid CPF number")
+        return;
+      }
+
+      if(state.crm.length < 4 || state.crm.length > 10){
+        ToastErr("Use a valid CRM number")
+        return;
+      }
+
       delete state.cnpj;
     }
     else if(state.type == 'Patient'){
+      if(state.cpf == '' || state.email == '' || state.username == '' || state.password == ""){
+        ToastErr("Fill all fields")
+        return;
+      }
+      var sum = 0;
+      var cpf = parseInt(state.cpf,10);
+      while (cpf) {
+          sum += cpf % 10;
+          cpf = Math.floor(cpf / 10);
+      }
+
+      if(sum % 11 != 0 || state.cpf.length != 11){
+        ToastErr("Use a valid CPF number")
+        return;
+      }
       delete state.crm;
       delete state.cnpj;
     }
     else{
+      if(state.cnpj == '' || state.email == '' || state.username == '' || state.password == ""){
+        ToastErr("Fill all fields")
+        return;
+      }
+      if(state.cnpj.length != 14){
+        ToastErr("Use a valid CNPJ number")
+        return;
+      }
       delete state.cpf;
       delete state.crm;
     }
+
+
 
     fetch('accounts/register/',{
       method:'POST',
@@ -53,6 +103,12 @@ class Register extends React.Component{
         console.log("going home",this.props.history)
         this.props.Login()
         this.props.history.push('/home')
+      }
+      else if(res.status == 300){
+        res.json().then(data=>{
+          ToastErr("A user with that "+data.field+" already exists")
+
+        })
       }
     })
   }

@@ -2,6 +2,7 @@ import React from 'react';
 import { TextField, Grid, Button, MenuItem, Typography } from '@material-ui/core'
 import { withRouter, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
+import { ToastErr, ToastSuccess } from './ToastFunction.js';
 
 const styles = {
   TextField:{
@@ -37,6 +38,7 @@ class Login extends React.Component{
         this.props.history.push('/home')
       }
       else{
+        ToastErr("Unable to login.")
         console.log("Não foi possivel fazer login")
       }
     })

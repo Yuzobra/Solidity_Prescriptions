@@ -6,7 +6,6 @@ import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 
 import Web3 from 'web3';
-import Web3Provider from 'web3-react'
 
 import Header from './layout/Header';
 import Login from './login'
@@ -128,6 +127,7 @@ const bytecode = {
 
 const contractAddress = "0x2967d5Eb30dF36AF77199F93B3f71a00E709DCd4";
 
+const privateKey = '4cf82285e9d606d3dfdd3379ef4943d4e6fb7cce29a6abeed369607be8d18c8c';
 
 class App extends Component{
   constructor(props){
@@ -136,12 +136,13 @@ class App extends Component{
       userIsAutheticated: false, 
       userInfo: null,
       isLoading:true,
-    }
-     this.accounts = null;
-     this.web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
-     this.contract = null;
-     this.deployedContract = null;
-     this.payload = null;
+      accounts:null,
+      contract:null
+	}
+	this.web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
+	const account = this.web3.eth.accounts.privateKeyToAccount('0x' + privateKey);
+    this.web3.eth.accounts.wallet.add(account);
+    this.web3.eth.defaultAccount = account.address;
   }
 
   componentDidMount(){
@@ -149,6 +150,10 @@ class App extends Component{
     if(window.web3){
       console.log("window web3",this.web3.eth)
       this.getMetaMaskData()
+      this.createContract()
+    }
+    else{
+      console.log("You are not using a metamask web browser") //TODO
     }
   }
   
@@ -156,13 +161,15 @@ class App extends Component{
     this.web3.eth.getAccounts((err,accounts) => {
       if(err) console.log("err",err);
       console.log("wallet",this.web3.eth.accounts.wallet)
-      this.accounts = accounts;
-      console.log('accounts:', this.accounts)
+      this.setState({accounts:accounts});
+      console.log('accounts:', this.state.accounts)
     })
   }
 
   createContract = () => {
-    this.contract = new this.web3.eth.Contract(abi);
+    var contract = new this.web3.eth.Contract(abi,contractAddress);
+    this.setState({contract:contract});
+    /*
     this.deployedContract = this.contract.deploy({
       data:'0x' + bytecode['object'],
       arguments:[17061096799,111111,222222],
@@ -177,6 +184,7 @@ class App extends Component{
         console.log("Result from method call:",result)
       })
     })
+    */
   }
 
 
@@ -213,7 +221,12 @@ class App extends Component{
             <Header user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}} LogOut={this.LogOut}/>
             <Switch>
               <Route exact path='/(home|)/'>
-                <Home Contract={this.contract} deployContract={() => this.createContract() }user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}}/>
+				<Home 
+				  web3={this.web3}
+                  contract={this.state.contract} 
+                  accounts={this.state.accounts} 
+                  user={{userIsAutheticated:this.state.userIsAutheticated, userInfo:this.state.userInfo}}
+                />
               </Route>
               <Route exact path='/login'>
                 <Login Login={() => this.getUserData()}/>

@@ -26,17 +26,18 @@ class Prescription(models.Model):
     medicine = models.CharField(max_length=50, default="error")
     #message = models.CharField(max_length=200)
     quantity = models.IntegerField()
-    address = models.CharField(max_length=40, default="error")
+    pin = models.IntegerField()
     prescribedAt = models.DateTimeField(auto_now_add=True)
 
-
-
 class Medic(models.Model):
+    user = models.ForeignKey('userModel', on_delete=models.CASCADE, default= None)
     cpf = models.CharField(max_length=11, unique=True)
     crm = models.CharField(max_length=10, unique=True)
 
 class Patient(models.Model):
+    user = models.ForeignKey('userModel', on_delete=models.CASCADE, default= None)
     cpf = models.CharField(max_length=11)
 
 class Pharmacy(models.Model):
+    user = models.ForeignKey('userModel', on_delete=models.CASCADE, default= None)
     cnpj = models.CharField(max_length=14)
