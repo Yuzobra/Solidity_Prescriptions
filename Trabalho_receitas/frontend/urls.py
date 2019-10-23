@@ -1,11 +1,12 @@
-from django.urls import path
+from django.urls import path, reverse_lazy
 from django.contrib.auth.decorators import login_required
-
+from django.views.generic import RedirectView
 from . import views
 
 
 urlpatterns = [
-    path('', login_required(views.index), name='default'),
+    path('/', login_required(views.index), name='default'),
+    path('ui/',  login_required(views.index), name='default'),
     path('home', login_required(views.index), name='home'),
     #auth
     path('login', views.index, name='login'),
@@ -17,5 +18,5 @@ urlpatterns = [
     #utility
     path('prescriptions/save', views.savePrescription, name='prescription-save'),
     path('prescriptions/get', views.getPrescriptions, name='prescriptions-get'),
-    path('prescriptions/info', views.getPrescriptionInfo, name='prescriptions-info')
+    path('prescriptions/info', views.getPrescriptionInfo, name='prescriptions-info'),
 ]

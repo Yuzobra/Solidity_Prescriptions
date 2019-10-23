@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Button, TextField, CircularProgress, Tooltip, IconButton } from '@material-ui/core'
+import { Typography, Button, TextField, CircularProgress, Tooltip, IconButton, Paper, TextareaAutosize } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles';
 import { withRouter } from 'react-router-dom';
 import MUIDataTable from "mui-datatables";
@@ -16,11 +16,22 @@ import DialogActions from '@material-ui/core/DialogActions';
 import { ToastErr, ToastSuccess } from './ToastFunction.js';
 
 import { Connectors } from 'web3-react'
+import { textAlign } from '@material-ui/system';
 
 const styles = {
   TextField:{
     width:200,
     marginRight:50,
+  },
+  paper:{
+    width:"95%",
+    padding:20,
+    marginTop: 20,
+    marginLeft: "auto",
+    marginRight: "auto",
+    textAlign: "center",
+    display: "flex",
+    backgroundColor: "#fcfafa",
   }
 }
 
@@ -49,8 +60,10 @@ class Home extends React.Component{
       medicinePIN: null,
       prescriptionBeingCreated:false,
       prescriptionBeingSold:false,
+      currentAccount: "",
     }
     this.classes = props.classes;
+    this.web3 = props.web3;
   }
 
   componentDidMount(){
@@ -70,35 +83,53 @@ class Home extends React.Component{
   }
 
   makePrescription(){
-  //salvar prescription no bd, checar se há um usuario com esse cpf, retornar informações para inserir na blockChain
-    fetch("/prescriptions/save",{
-      method: "POST",
-      accept:'application/json',
-      body: JSON.stringify({
-        cpf:this.state.patientCPF,
-        medicine:this.state.medicineName,
-        quantity:this.state.quantity
-      })
-    }).then(res => {
-      console.log("Res", res)
-      if(res.status == 300){
-        ToastErr("There is no patient with the given CPF");
+    var account = "";
+    this.web3.eth.getAccounts((err,accounts) => {
+      if(err) console.log("err",err);
+      // this.setState({currentAccount:accounts[0]})
+      if(accounts.length == 0){
+        ToastErr("Please utilize Metamask to make prescriptions")
         this.setState({prescriptionBeingCreated:false})
+        return;
       }
-      else if(res.status == 200){
-        res.json().then(data => {
-          console.log("data",data)
-          this.state.contract.methods.makePrescription(this.state.medicineName,this.state.quantity,data.crm,this.state.patientCPF,data.dateTime).send({
-            from:this.props.web3.eth.defaultAccount,
-            gas:4000000,
-          }).then((receipt) => {
-            ToastSuccess("Prescription saved with sucess!")
-            this.setState({prescriptionBeingCreated:false})
-            console.log("Receipt from make:",receipt)
-            console.log("Events",receipt.events)
-          })
+      account = accounts[0]
+      //salvar prescription no bd, checar se há um usuario com esse cpf, retornar informações para inserir na blockChain
+      fetch("/prescriptions/save",{
+        method: "POST",
+        accept:'application/json',
+        body: JSON.stringify({
+          cpf:this.state.patientCPF,
+          medicine:this.state.medicineName,
+          quantity:this.state.quantity,
+          metamaskAccount:account.slice(2),
         })
-      }
+      }).then(res => {
+        console.log("Res", res)
+        if(res.status == 300){
+          ToastErr("There is no patient with the given CPF");
+          this.setState({prescriptionBeingCreated:false})
+        }
+        else if(res.status == 301){
+          res.json().then(data=>{
+            ToastErr("Please utilize the this accounts' Metamask wallet: 0x" + data.accountPrefix + "...");
+            this.setState({prescriptionBeingCreated:false})
+          })
+        }
+        else if(res.status == 200){
+          res.json().then(data => {
+            console.log("data",data)
+            this.state.contract.methods.makePrescription(this.state.medicineName,this.state.quantity,data.crm,this.state.patientCPF,data.dateTime).send({
+              from:this.props.web3.eth.defaultAccount,
+              gas:4000000,
+            }).then((receipt) => {
+              ToastSuccess("Prescription saved with sucess!")
+              this.setState({prescriptionBeingCreated:false})
+              console.log("Receipt from make:",receipt)
+              console.log("Events",receipt.events)
+            })
+          })
+        }
+      })
     })
   }
 
@@ -316,6 +347,7 @@ class Home extends React.Component{
       else if(this.state.user.type == "Medic"){
         return(
           <div>
+            <Paper className={this.classes.paper}>
             <TextField 
               className={this.classes.TextField} 
               name="patientCPF" 
@@ -350,13 +382,14 @@ class Home extends React.Component{
                   Make Prescription
               </Button>
             }
-
+          </Paper>
           </div>
         )
       }
       else /* Pharmacy */ {
         return(
           <div>
+            <Paper className={this.classes.paper}>
             <TextField 
               className={this.classes.TextField} 
               name="patientCPF" 
@@ -384,6 +417,7 @@ class Home extends React.Component{
               >Sell Medicine</Button>
             }
             {/* <Button onClick={() => this.getPrescriptionValidity()}>Get validity</Button> */}
+            </Paper>
           </div>
         )
       }

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextField, Grid, Button, MenuItem, Typography } from '@material-ui/core'
+import { TextField, Grid, Button, MenuItem, Typography, Tooltip, IconButton, CircularProgress } from '@material-ui/core'
+import FingerprintIcon from '@material-ui/icons/Fingerprint';
 import { withRouter, Link } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
 import { ToastErr, ToastSuccess } from './ToastFunction.js';
@@ -14,6 +15,7 @@ const styles = {
 class Register extends React.Component{
   constructor(props){
     super(props);
+    this.web3 = props.web3;
     this.state = {
       email:'',
       username:'',
@@ -21,7 +23,9 @@ class Register extends React.Component{
       type:'',
       cpf:'',
       crm:'',
-      cnpj:''
+      cnpj:'',
+      metamaskAccount:'',
+      metamaskLoading:false,
     }
     this.classes = props.classes;
   }
@@ -36,7 +40,7 @@ class Register extends React.Component{
 
 
     if(state.type == 'Medic'){
-      if(state.cpf == '' || state.crm == '' || state.email == '' || state.username == '' || state.password == ""){
+      if(state.cpf == '' || state.crm == '' || state.email == '' || state.username == '' || state.password == "" || state.metamaskAccount == ''){
         ToastErr("Fill all fields")
         return;
       }
@@ -56,8 +60,9 @@ class Register extends React.Component{
         ToastErr("Use a valid CRM number")
         return;
       }
-
+      state.metamaskAccount = state.metamaskAccount.slice(2)
       delete state.cnpj;
+      delete state.metamaskLoading;
     }
     else if(state.type == 'Patient'){
       if(state.cpf == '' || state.email == '' || state.username == '' || state.password == ""){
@@ -77,6 +82,9 @@ class Register extends React.Component{
       }
       delete state.crm;
       delete state.cnpj;
+      delete state.metamaskAccount;
+      delete state.metamaskLoading;
+
     }
     else{
       if(state.cnpj == '' || state.email == '' || state.username == '' || state.password == ""){
@@ -89,6 +97,8 @@ class Register extends React.Component{
       }
       delete state.cpf;
       delete state.crm;
+      delete state.metamaskAccount;
+      delete state.metamaskLoading;
     }
 
 
@@ -113,6 +123,24 @@ class Register extends React.Component{
     })
   }
 
+  getMetamaskAccount(){
+    this.setState({metamaskLoading:true})
+    this.web3.eth.getAccounts((err,accounts) => {
+      if(err) 
+        {
+          console.log("err",err);
+          this.setState({metamaskLoading:false})
+          ToastErr("Error retrieving Metamask account")
+        }
+      else if(accounts.length == 0){
+        this.setState({metamaskLoading:false})
+        ToastErr("Please install the Metamask plugin and create an account")
+      }
+      console.log("wallet",this.web3.eth.accounts.wallet)
+      this.setState({metamaskAccount:accounts[0], metamaskLoading:false});
+    })
+  }
+
   extraField(){
     if(this.state.type != ''){
       if(this.state.type == 'Patient'){
@@ -131,6 +159,32 @@ class Register extends React.Component{
             <div>
               <TextField className={this.classes.TextField} name="crm" id="crm" label="CRM" onChange={(e)=>this.handleChange('crm',e)}/>
             </div>
+            <Tooltip title="This will be the account you'll need to use whenever making a prescription">
+              <TextField 
+                className={this.classes.TextField} 
+                disabled
+                name="metamaskAccount" 
+                id='metamaskAccount' 
+                label="Metamask Account" 
+                required
+                select={false}
+                value={this.state.metamaskAccount}
+                onChange={(e) => this.handleChange("metamaskAccount",e)}
+                InputProps={{
+                  endAdornment:
+                    this.state.metamaskLoading == true ? 
+                    (
+                      <CircularProgress style={{margin:5}} size={16}/>
+                    )
+                    :
+                    <div>
+                      <IconButton onClick={() => this.getMetamaskAccount()} size="small" style={{margin:5}}>
+                        <FingerprintIcon />
+                      </IconButton>
+                    </div>
+                }}
+              />
+            </Tooltip>
           </div>
         )
       }

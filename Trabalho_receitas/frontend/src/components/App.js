@@ -232,7 +232,7 @@ class App extends Component{
                 <Login Login={() => this.getUserData()}/>
               </Route>
               <Route exact path="/register">
-                <Register Login={() => this.getUserData()}/>
+                <Register web3={this.web3} Login={() => this.getUserData()}/>
               </Route>
             </Switch>
           </Router>

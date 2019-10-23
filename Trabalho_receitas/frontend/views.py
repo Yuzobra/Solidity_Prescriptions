@@ -37,6 +37,8 @@ def RegisterUser(request):
                 return HttpResponse(json.dumps({"field":"cpf"}),status= 300)
             if(len(Medic.objects.filter(crm = body["crm"])) != 0):
                 return HttpResponse(json.dumps({"field":"crm"}),status= 300)
+            if(len(Medic.objects.filter(metamaskAccount = body["metamaskAccount"])) != 0):
+                return HttpResponse(json.dumps({"field":"Metamask Account"}),status= 300)
         else:
             if(len(Pharmacy.objects.filter(cnpj = body["cnpj"])) != 0):
                 return HttpResponse(json.dumps({"field":"cnpj"}),status= 300)
@@ -60,7 +62,7 @@ def RegisterUser(request):
 
         elif(body["type"] == "Medic"):
             try:
-                medic = Medic(user=user, cpf=body["cpf"], crm=body["crm"])
+                medic = Medic(user=user, cpf=body["cpf"], crm=body["crm"], metamaskAccount= body["metamaskAccount"])
                 medic.save()
             except Exception as err:
                 print("Error registering new medic in medic table:"+str(err))
@@ -122,6 +124,9 @@ def savePrescription(request):
     except Exception as err:
         print(err)
 
+    if(body["metamaskAccount"] != medic.metamaskAccount):
+        return HttpResponse(json.dumps({"accountPrefix": medic.metamaskAccount[0:5]}), status=301)
+
     try:
         pin = random.randint(10000,99999)
         while len(Prescription.objects.filter(patient= patient, pin = pin)) != 0:
@@ -132,7 +137,6 @@ def savePrescription(request):
         print(err)
     data = {"cpfPatient":patient.cpf, "crm":medic.crm, "dateTime": str(prescription.prescribedAt)}
     return HttpResponse(json.dumps(data))
-
 def getPrescriptions(request):
     if(request.user.type != "Patient"):
         return HttpResponse(status=403)

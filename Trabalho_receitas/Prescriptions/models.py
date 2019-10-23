@@ -33,7 +33,7 @@ class Medic(models.Model):
     user = models.ForeignKey('userModel', on_delete=models.CASCADE, default= None)
     cpf = models.CharField(max_length=11, unique=True)
     crm = models.CharField(max_length=10, unique=True)
-
+    metamaskAccount = models.CharField(max_length=40, unique=True)
 class Patient(models.Model):
     user = models.ForeignKey('userModel', on_delete=models.CASCADE, default= None)
     cpf = models.CharField(max_length=11)
